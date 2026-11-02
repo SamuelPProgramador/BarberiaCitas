@@ -19,7 +19,9 @@ def get_db():
 def init_db():
     with get_db() as db:
 
-        # Tabla de servicios
+        # ---------------------------------
+        # TABLA DE SERVICIOS
+        # ---------------------------------
         db.execute("""
             CREATE TABLE IF NOT EXISTS servicios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +33,9 @@ def init_db():
             )
         """)
 
-        # Tabla de citas
+        # ---------------------------------
+        # TABLA DE CITAS
+        # ---------------------------------
         db.execute("""
             CREATE TABLE IF NOT EXISTS citas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,15 +46,83 @@ def init_db():
                 hora TEXT NOT NULL,
                 estado TEXT DEFAULT 'pendiente',
                 fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
-
                 FOREIGN KEY (servicio_id)
-                    REFERENCES servicios(id),
-
-                UNIQUE (fecha, hora)
+                    REFERENCES servicios(id)
             )
         """)
 
-        # Servicios iniciales
+        # ---------------------------------
+        # TABLA DE CONFIGURACIÓN
+        # ---------------------------------
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS configuracion (
+                clave TEXT PRIMARY KEY,
+                valor TEXT
+            )
+        """)
+
+        # ---------------------------------
+        # MIGRACIÓN DE CITAS EXISTENTES
+        # ---------------------------------
+        columnas = {
+            fila["name"]
+            for fila in db.execute(
+                "PRAGMA table_info(citas)"
+            ).fetchall()
+        }
+
+        nuevas_columnas = {
+            "precio_reservado": "INTEGER DEFAULT 0",
+            "monto_deposito": "INTEGER DEFAULT 0",
+            "pago_estado": "TEXT DEFAULT 'pendiente'",
+            "comprobante": "TEXT",
+            "fecha_pago": "TEXT"
+        }
+
+        for nombre, tipo in nuevas_columnas.items():
+            if nombre not in columnas:
+                db.execute(
+                    f"ALTER TABLE citas ADD COLUMN {nombre} {tipo}"
+                )
+
+        # ---------------------------------
+        # PRECIO HISTÓRICO
+        # ---------------------------------
+        db.execute("""
+            UPDATE citas
+            SET precio_reservado = (
+                SELECT precio
+                FROM servicios
+                WHERE servicios.id = citas.servicio_id
+            )
+            WHERE precio_reservado = 0
+        """)
+
+        # ---------------------------------
+        # CONFIGURACIÓN INICIAL
+        # ---------------------------------
+        configuraciones = [
+            ("banco_nombre", ""),
+            ("banco_titular", ""),
+            ("banco_tipo_cuenta", ""),
+            ("banco_numero_cuenta", ""),
+            ("banco_documento", ""),
+            ("porcentaje_deposito", "50"),
+            ("hora_apertura", "08:00"),
+            ("hora_cierre", "23:00"),
+            ("descanso_minutos", "15"),
+            ("descanso_opcional", "1")
+        ]
+
+        db.executemany("""
+            INSERT OR IGNORE INTO configuracion
+            (clave, valor)
+            VALUES (?, ?)
+        """, configuraciones)
+
+        # ---------------------------------
+        # SERVICIOS INICIALES
+        # ---------------------------------
         cantidad = db.execute(
             "SELECT COUNT(*) FROM servicios"
         ).fetchone()[0]
@@ -72,14 +144,13 @@ def init_db():
         db.commit()
 
 
-if __name__ == "__main__":
-    init_db()
-    print(f"Base de datos creada en: {DATABASE}")
-
-
-
 def migrar_citas():
+    """
+    Elimina la restricción UNIQUE(fecha, hora)
+    para permitir citas según su duración real.
+    """
     with get_db() as db:
+
         tabla = db.execute("""
             SELECT sql
             FROM sqlite_master
@@ -99,22 +170,33 @@ def migrar_citas():
                     hora TEXT NOT NULL,
                     estado TEXT DEFAULT 'pendiente',
                     fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (servicio_id) REFERENCES servicios(id)
+                    precio_reservado INTEGER DEFAULT 0,
+                    monto_deposito INTEGER DEFAULT 0,
+                    pago_estado TEXT DEFAULT 'pendiente',
+                    comprobante TEXT,
+                    fecha_pago TEXT,
+                    FOREIGN KEY (servicio_id)
+                        REFERENCES servicios(id)
                 )
             """)
 
             db.execute("""
                 INSERT INTO citas_nueva
-                (id, cliente, telefono, servicio_id,
-                 fecha, hora, estado, fecha_creacion)
-                SELECT id, cliente, telefono, servicio_id,
-                       fecha, hora, estado, fecha_creacion
+                SELECT *
                 FROM citas
             """)
 
             db.execute("DROP TABLE citas")
-            db.execute("ALTER TABLE citas_nueva RENAME TO citas")
-            db.execute("PRAGMA foreign_keys = ON")
+            db.execute("""
+                ALTER TABLE citas_nueva
+                RENAME TO citas
+            """)
 
+            db.execute("PRAGMA foreign_keys = ON")
             db.commit()
-            print("Migración de citas completada.")
+
+
+if __name__ == "__main__":
+    init_db()
+    migrar_citas()
+    print(f"Base de datos preparada: {DATABASE}")
