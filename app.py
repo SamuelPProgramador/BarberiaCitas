@@ -327,6 +327,66 @@ def admin_servicios():
     )
 
 
+# ---------------------------------
+# CONFIGURACIÓN DE LA BARBERÍA
+# ---------------------------------
+
+@app.route("/admin/configuracion", methods=["GET", "POST"])
+@requiere_login
+def admin_configuracion():
+
+    if request.method == "POST":
+
+        datos = {
+            "banco_nombre": request.form.get("banco_nombre", "").strip(),
+            "banco_titular": request.form.get("banco_titular", "").strip(),
+            "banco_tipo_cuenta": request.form.get("banco_tipo_cuenta", "").strip(),
+            "banco_numero_cuenta": request.form.get("banco_numero_cuenta", "").strip(),
+            "banco_documento": request.form.get("banco_documento", "").strip(),
+            "porcentaje_deposito": request.form.get("porcentaje_deposito", "50").strip()
+        }
+
+        try:
+            porcentaje = int(datos["porcentaje_deposito"])
+        except ValueError:
+            flash("El porcentaje debe ser un número.", "error")
+            return redirect(url_for("admin_configuracion"))
+
+        if porcentaje < 1 or porcentaje > 100:
+            flash("El porcentaje debe estar entre 1 y 100.", "error")
+            return redirect(url_for("admin_configuracion"))
+
+        with get_db() as db:
+            for clave, valor in datos.items():
+                db.execute("""
+                    INSERT INTO configuracion (clave, valor)
+                    VALUES (?, ?)
+                    ON CONFLICT(clave)
+                    DO UPDATE SET valor = excluded.valor
+                """, (clave, valor))
+
+            db.commit()
+
+        flash("Configuración guardada correctamente.", "success")
+        return redirect(url_for("admin_configuracion"))
+
+    with get_db() as db:
+        filas = db.execute("""
+            SELECT clave, valor FROM configuracion
+        """).fetchall()
+
+    configuracion = {
+        fila["clave"]: fila["valor"]
+        for fila in filas
+    }
+
+    return render_template(
+        "configuracion.html",
+        configuracion=configuracion
+    )
+
+
+
 @app.route("/admin/servicios/<int:servicio_id>/editar", methods=["POST"])
 @requiere_login
 def editar_servicio(servicio_id):
