@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Barbería | Reservas</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">✂ LA BARBERÍA</div>
+        <nav>
+            <a href="#inicio">Inicio</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#reservar">Reservar cita</a>
+        </nav>
+    </header>
+
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <span class="tag">TEMPORADA NAVIDEÑA 🎄</span>
+            <h1>Tu estilo comienza <span>aquí.</span></h1>
+            <p>Reserva tu cita fácilmente y olvídate de las filas.</p>
+            <a href="#reservar" class="btn">RESERVAR MI CITA →</a>
+        </div>
+    </section>
+
+    <section class="services" id="servicios">
+        <h2>Nuestros servicios</h2>
+
+        <div class="service-grid">
+            <article class="service-card">
+                <div class="icon">💈</div>
+                <h3>Corte clásico</h3>
+                <p>Un corte limpio y definido.</p>
+                <strong>RD$ 300</strong>
+            </article>
+
+            <article class="service-card">
+                <div class="icon">🧔</div>
+                <h3>Corte + barba</h3>
+                <p>Un look completo y fresco.</p>
+                <strong>RD$ 500</strong>
+            </article>
+
+            <article class="service-card">
+                <div class="icon">✂️</div>
+                <h3>Barba completa</h3>
+                <p>Perfilado y acabado preciso.</p>
+                <strong>RD$ 300</strong>
+            </article>
+
+            <article class="service-card">
+                <div class="icon">⚡</div>
+                <h3>Diseño especial</h3>
+                <p>Detalles personalizados.</p>
+                <strong>RD$ 400</strong>
+            </article>
+        </div>
+    </section>
+
+    <section class="booking" id="reservar">
+        <h2>Reserva tu cita</h2>
+        <p>Próximamente podrás reservar tu turno desde aquí.</p>
+        <button class="btn" onclick="alert('¡Próximamente podrás reservar!')">
+            RESERVAR AHORA
+        </button>
+    </section>
+
+    <footer>
+        <p>© 2026 La Barbería | Estilo, actitud y calidad.</p>
+    </footer>
+
+</body>
+</html>
