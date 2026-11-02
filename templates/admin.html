@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda | La Barbería</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+
+<header class="admin-navbar">
+    <a href="/" class="admin-brand">✂ LA BARBERÍA</a>
+    <div>
+        <span>Administración</span>
+        <a href="{{ url_for('logout') }}" class="logout">Salir</a>
+    </div>
+</header>
+
+<main class="dashboard">
+
+    <div class="dashboard-heading">
+        <div>
+            <span class="tag">GESTIÓN DE NEGOCIO</span>
+            <h1>Panel de control</h1>
+            <p>Administra tus citas y organiza tu agenda.</p>
+        </div>
+        <span class="today-label">📅 {{ hoy }}</span>
+    </div>
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <span>Total de citas</span>
+            <strong>{{ estadisticas.total or 0 }}</strong>
+        </div>
+
+        <div class="stat-card pending">
+            <span>Pendientes</span>
+            <strong>{{ estadisticas.pendientes or 0 }}</strong>
+        </div>
+
+        <div class="stat-card confirmed">
+            <span>Confirmadas</span>
+            <strong>{{ estadisticas.confirmadas or 0 }}</strong>
+        </div>
+
+        <div class="stat-card cancelled">
+            <span>Canceladas</span>
+            <strong>{{ estadisticas.canceladas or 0 }}</strong>
+        </div>
+
+    </div>
+
+    <div class="admin-grid">
+
+        <section class="calendar-card">
+
+            <div class="calendar-header">
+                <h2>{{ nombre_mes }} {{ anio }}</h2>
+
+                <div class="calendar-navigation">
+                    <a href="{{ url_for('admin', mes=12 if mes == 1 else mes-1, anio=anio-1 if mes == 1 else anio) }}">‹</a>
+
+                    <a href="{{ url_for('admin', mes=1 if mes == 12 else mes+1, anio=anio+1 if mes == 12 else anio) }}">›</a>
+                </div>
+            </div>
+
+            <div class="calendar-grid weekdays">
+                <span>Lun</span><span>Mar</span><span>Mié</span>
+                <span>Jue</span><span>Vie</span><span>Sáb</span>
+                <span>Dom</span>
+            </div>
+
+            <div class="calendar-grid days">
+
+                {% for semana in semanas %}
+                    {% for dia in semana %}
+
+                        {% set clave = dia.isoformat() %}
+                        {% set cantidad = citas_por_dia.get(clave, [])|length %}
+
+                        <button
+                            type="button"
+                            class="calendar-day
+                            {% if dia.month != mes %}other-month{% endif %}
+                            {% if clave == hoy %}today{% endif %}"
+                            data-date="{{ clave }}">
+
+                            <span>{{ dia.day }}</span>
+
+                            {% if cantidad > 0 %}
+                                <small>{{ cantidad }} cita(s)</small>
+                            {% endif %}
+
+                        </button>
+
+                    {% endfor %}
+                {% endfor %}
+
+            </div>
+
+            <div class="calendar-legend">
+                <span>● Pendientes</span>
+                <span>● Confirmadas</span>
+            </div>
+
+        </section>
+
+        <section class="appointments-card">
+
+            <div class="appointments-heading">
+                <div>
+                    <span class="tag">AGENDA DIARIA</span>
+                    <h2 id="selectedDate">Citas del día</h2>
+                </div>
+            </div>
+
+            <div id="appointmentsList">
+                <p class="empty-state">Selecciona un día del calendario.</p>
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+<script>
+    const fechaInicial = "{{ fecha_seleccionada }}";
+</script>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+</body>
+</html>

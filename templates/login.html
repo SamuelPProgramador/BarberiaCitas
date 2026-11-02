@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso administrativo | La Barbería</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="admin-body">
+
+    <div class="login-card">
+        <div class="login-logo">✂</div>
+        <h1>LA BARBERÍA</h1>
+        <p>Panel administrativo</p>
+
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="login-error">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <label>Usuario</label>
+            <input type="text" name="usuario" required
+                   autocomplete="username">
+
+            <label>Contraseña</label>
+            <input type="password" name="password" required
+                   autocomplete="current-password">
+
+            <button class="btn" type="submit">
+                INICIAR SESIÓN
+            </button>
+        </form>
+
+        <a href="/" class="back-link">← Volver a la página principal</a>
+    </div>
+
+</body>
+</html>
