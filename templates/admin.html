@@ -12,10 +12,15 @@
 
 <header class="admin-navbar">
     <a href="/" class="admin-brand">✂ LA BARBERÍA</a>
-    <div>
-        <span>Administración</span>
-        <a href="{{ url_for('logout') }}" class="logout">Salir</a>
-    </div>
+
+<div>
+    <a href="{{ url_for('admin_servicios') }}">
+        ✂ Servicios y combos
+    </a>
+    <span>Administración</span>
+    <a href="{{ url_for('logout') }}" class="logout">Salir</a>
+</div>
+
 </header>
 
 <main class="dashboard">

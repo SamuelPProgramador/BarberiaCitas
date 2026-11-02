@@ -282,6 +282,98 @@ def cambiar_estado(cita_id):
 
 
 # ---------------------------------
+# GESTIÓN DE SERVICIOS
+# ---------------------------------
+
+@app.route("/admin/servicios", methods=["GET", "POST"])
+@requiere_login
+def admin_servicios():
+
+    if request.method == "POST":
+        nombre = request.form.get("nombre", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        precio = request.form.get("precio", type=int)
+        duracion = request.form.get("duracion", type=int)
+
+        if not nombre or precio is None or duracion is None:
+            flash("Completa todos los campos.", "error")
+            return redirect(url_for("admin_servicios"))
+
+        if precio <= 0 or duracion <= 0:
+            flash("El precio y la duración deben ser mayores que cero.", "error")
+            return redirect(url_for("admin_servicios"))
+
+        with get_db() as db:
+            db.execute("""
+                INSERT INTO servicios
+                (nombre, descripcion, precio, duracion, activo)
+                VALUES (?, ?, ?, ?, 1)
+            """, (nombre, descripcion, precio, duracion))
+            db.commit()
+
+        flash("Servicio creado correctamente.", "success")
+        return redirect(url_for("admin_servicios"))
+
+    with get_db() as db:
+        servicios = db.execute("""
+            SELECT *
+            FROM servicios
+            ORDER BY activo DESC, nombre
+        """).fetchall()
+
+    return render_template(
+        "servicios_admin.html",
+        servicios=servicios
+    )
+
+
+@app.route("/admin/servicios/<int:servicio_id>/editar", methods=["POST"])
+@requiere_login
+def editar_servicio(servicio_id):
+
+    nombre = request.form.get("nombre", "").strip()
+    descripcion = request.form.get("descripcion", "").strip()
+    precio = request.form.get("precio", type=int)
+    duracion = request.form.get("duracion", type=int)
+
+    if not nombre or precio is None or duracion is None:
+        flash("Completa todos los campos.", "error")
+        return redirect(url_for("admin_servicios"))
+
+    if precio <= 0 or duracion <= 0:
+        flash("Precio y duración deben ser mayores que cero.", "error")
+        return redirect(url_for("admin_servicios"))
+
+    with get_db() as db:
+        db.execute("""
+            UPDATE servicios
+            SET nombre = ?, descripcion = ?, precio = ?, duracion = ?
+            WHERE id = ?
+        """, (nombre, descripcion, precio, duracion, servicio_id))
+        db.commit()
+
+    flash("Servicio actualizado.", "success")
+    return redirect(url_for("admin_servicios"))
+
+
+@app.route("/admin/servicios/<int:servicio_id>/estado", methods=["POST"])
+@requiere_login
+def cambiar_estado_servicio(servicio_id):
+
+    with get_db() as db:
+        db.execute("""
+            UPDATE servicios
+            SET activo = CASE WHEN activo = 1 THEN 0 ELSE 1 END
+            WHERE id = ?
+        """, (servicio_id,))
+        db.commit()
+
+    flash("Estado del servicio actualizado.", "success")
+    return redirect(url_for("admin_servicios"))
+
+
+
+# ---------------------------------
 # MOTOR DE HORARIOS Y RESERVAS
 # ---------------------------------
 

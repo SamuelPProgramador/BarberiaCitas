@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios | Barbería</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .services-admin {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .service-form, .service-card {
+            background: var(--card, #fff);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+
+        .service-form input,
+        .service-form textarea,
+        .service-card input,
+        .service-card textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0 14px;
+            box-sizing: border-box;
+        }
+
+        .service-card form {
+            margin-top: 15px;
+        }
+
+        .service-card button,
+        .service-form button {
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .inactive {
+            opacity: .65;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="services-admin">
+
+    <h1>Gestionar servicios y combos</h1>
+
+    <p>
+        <a href="{{ url_for('admin') }}">← Volver al calendario</a>
+    </p>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% for categoria, mensaje in mensajes %}
+            <p>{{ mensaje }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="service-form">
+        <h2>Crear nuevo servicio</h2>
+
+        <form method="POST">
+            <label>Nombre del corte o combo</label>
+            <input type="text" name="nombre" required maxlength="100"
+                   placeholder="Ej. Corte premium">
+
+            <label>Descripción</label>
+            <textarea name="descripcion"
+                      placeholder="Describe el servicio"></textarea>
+
+            <label>Precio (RD$)</label>
+            <input type="number" name="precio" min="1" required>
+
+            <label>Duración en minutos</label>
+            <input type="number" name="duracion" min="1" required>
+
+            <button type="submit">Crear servicio</button>
+        </form>
+    </section>
+
+    <h2>Servicios existentes</h2>
+
+    <div class="service-grid">
+
+        {% for servicio in servicios %}
+        <article class="service-card
+            {% if not servicio['activo'] %}inactive{% endif %}">
+
+            <h3>
+                {{ servicio['nombre'] }}
+                {% if not servicio['activo'] %}
+                    (Inactivo)
+                {% endif %}
+            </h3>
+
+            <form method="POST"
+                  action="{{ url_for('editar_servicio',
+                                   servicio_id=servicio['id']) }}">
+
+                <label>Nombre</label>
+                <input type="text" name="nombre"
+                       value="{{ servicio['nombre'] }}"
+                       required maxlength="100">
+
+                <label>Descripción</label>
+                <textarea name="descripcion">{{ servicio['descripcion'] or '' }}</textarea>
+
+                <label>Precio (RD$)</label>
+                <input type="number" name="precio"
+                       value="{{ servicio['precio'] }}" min="1" required>
+
+                <label>Duración (minutos)</label>
+                <input type="number" name="duracion"
+                       value="{{ servicio['duracion'] }}" min="1" required>
+
+                <button type="submit">Guardar cambios</button>
+            </form>
+
+            <form method="POST"
+                  action="{{ url_for('cambiar_estado_servicio',
+                                   servicio_id=servicio['id']) }}">
+
+                {% if servicio['activo'] %}
+                    <button type="submit">Desactivar servicio</button>
+                {% else %}
+                    <button type="submit">Activar servicio</button>
+                {% endif %}
+            </form>
+
+        </article>
+        {% else %}
+            <p>No hay servicios registrados.</p>
+        {% endfor %}
+
+    </div>
+</div>
+
+</body>
+</html>
