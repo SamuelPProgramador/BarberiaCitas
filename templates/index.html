@@ -31,35 +31,30 @@
     <section class="services" id="servicios">
         <h2>Nuestros servicios</h2>
 
-        <div class="service-grid">
-            <article class="service-card">
-                <div class="icon">💈</div>
-                <h3>Corte clásico</h3>
-                <p>Un corte limpio y definido.</p>
-                <strong>RD$ 300</strong>
-            </article>
+<div class="service-grid">
 
-            <article class="service-card">
-                <div class="icon">🧔</div>
-                <h3>Corte + barba</h3>
-                <p>Un look completo y fresco.</p>
-                <strong>RD$ 500</strong>
-            </article>
+    {% for servicio in servicios %}
 
-            <article class="service-card">
-                <div class="icon">✂️</div>
-                <h3>Barba completa</h3>
-                <p>Perfilado y acabado preciso.</p>
-                <strong>RD$ 300</strong>
-            </article>
+    <article class="service-card">
 
-            <article class="service-card">
-                <div class="icon">⚡</div>
-                <h3>Diseño especial</h3>
-                <p>Detalles personalizados.</p>
-                <strong>RD$ 400</strong>
-            </article>
+        <div class="icon">💈</div>
+
+        <h3>{{ servicio.nombre }}</h3>
+
+        <p>{{ servicio.descripcion }}</p>
+
+        <strong>RD$ {{ servicio.precio }}</strong>
+
+        <div class="duration">
+            ◷ {{ servicio.duracion }} minutos
         </div>
+
+    </article>
+
+    {% endfor %}
+
+</div>
+
     </section>
 
     <section class="booking" id="reservar">
