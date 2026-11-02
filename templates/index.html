@@ -11,7 +11,7 @@
 <body>
 
     <header class="navbar">
-        <div class="logo">✂ LA BARBERÍA</div>
+        <div class="logo">✂ Daury BaberShop</div>
         <nav>
             <a href="#inicio">Inicio</a>
             <a href="#servicios">Servicios</a>
@@ -57,17 +57,81 @@
 
     </section>
 
-    <section class="booking" id="reservar">
-        <h2>Reserva tu cita</h2>
-        <p>Próximamente podrás reservar tu turno desde aquí.</p>
-        <button class="btn" onclick="alert('¡Próximamente podrás reservar!')">
-            RESERVAR AHORA
-        </button>
-    </section>
+
+<section class="booking" id="reservar">
+    <div class="booking-container">
+
+        <div class="booking-heading">
+            <span class="tag">AGENDA ONLINE</span>
+            <h2>Reserva tu cita</h2>
+            <p>Selecciona tu servicio, fecha y horario preferido.</p>
+        </div>
+
+        <form id="bookingForm">
+
+            <div class="form-group">
+                <label for="servicio">Servicio</label>
+                <select id="servicio" required>
+                    <option value="">Selecciona un servicio</option>
+
+                    {% for servicio in servicios %}
+                    <option value="{{ servicio.id }}">
+                        {{ servicio.nombre }} -
+                        RD$ {{ servicio.precio }}
+                        ({{ servicio.duracion }} min)
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="fecha">Fecha de la cita</label>
+                <input type="date" id="fecha" required>
+            </div>
+
+            <div class="form-group">
+                <label>Horarios disponibles</label>
+                <div id="horarios" class="slots">
+                    <p>Selecciona un servicio y una fecha.</p>
+                </div>
+            </div>
+
+            <input type="hidden" id="hora">
+
+            <div class="form-group">
+                <label for="cliente">Nombre completo</label>
+                <input
+                    type="text"
+                    id="cliente"
+                    maxlength="100"
+                    placeholder="Ej. Juan Pérez"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Número de WhatsApp</label>
+                <input
+                    type="tel"
+                    id="telefono"
+                    maxlength="20"
+                    placeholder="Ej. 8091234567"
+                    required>
+            </div>
+
+            <button type="submit" class="btn" id="btnReservar">
+                CONFIRMAR SOLICITUD →
+            </button>
+
+            <div id="resultado" class="resultado"></div>
+
+        </form>
+    </div>
+</section>
+
 
     <footer>
         <p>© 2026 La Barbería | Estilo, actitud y calidad.</p>
     </footer>
-
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

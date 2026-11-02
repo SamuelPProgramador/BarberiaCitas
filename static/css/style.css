@@ -185,3 +185,104 @@ footer {
         grid-template-columns: 1fr;
     }
 }
+
+
+.booking-container {
+    max-width: 650px;
+    margin: auto;
+    background: var(--card);
+    border: 1px solid #333;
+    border-radius: 18px;
+    padding: 35px;
+    text-align: left;
+}
+
+.booking-heading {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.booking-heading p {
+    color: var(--muted);
+    margin-top: 10px;
+}
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px;
+    border-radius: 9px;
+    border: 1px solid #383838;
+    background: #0b0c0f;
+    color: white;
+    font-size: 15px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+
+.slots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.slot {
+    background: #0b0c0f;
+    border: 1px solid #383838;
+    color: white;
+    padding: 11px 16px;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.slot:hover,
+.slot.active {
+    background: var(--gold);
+    color: #111;
+    border-color: var(--gold);
+}
+
+.slot:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+#btnReservar {
+    width: 100%;
+    justify-content: center;
+}
+
+.resultado {
+    margin-top: 20px;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.resultado.error {
+    color: #ff7777;
+}
+
+.resultado.success {
+    color: #72d69b;
+}
+
+@media(max-width: 500px) {
+    .booking-container {
+        padding: 22px;
+    }
+}

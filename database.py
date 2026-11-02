@@ -75,3 +75,46 @@ def init_db():
 if __name__ == "__main__":
     init_db()
     print(f"Base de datos creada en: {DATABASE}")
+
+
+
+def migrar_citas():
+    with get_db() as db:
+        tabla = db.execute("""
+            SELECT sql
+            FROM sqlite_master
+            WHERE type = 'table' AND name = 'citas'
+        """).fetchone()
+
+        if tabla and "UNIQUE (fecha, hora)" in tabla["sql"]:
+            db.execute("PRAGMA foreign_keys = OFF")
+
+            db.execute("""
+                CREATE TABLE citas_nueva (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cliente TEXT NOT NULL,
+                    telefono TEXT NOT NULL,
+                    servicio_id INTEGER NOT NULL,
+                    fecha TEXT NOT NULL,
+                    hora TEXT NOT NULL,
+                    estado TEXT DEFAULT 'pendiente',
+                    fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (servicio_id) REFERENCES servicios(id)
+                )
+            """)
+
+            db.execute("""
+                INSERT INTO citas_nueva
+                (id, cliente, telefono, servicio_id,
+                 fecha, hora, estado, fecha_creacion)
+                SELECT id, cliente, telefono, servicio_id,
+                       fecha, hora, estado, fecha_creacion
+                FROM citas
+            """)
+
+            db.execute("DROP TABLE citas")
+            db.execute("ALTER TABLE citas_nueva RENAME TO citas")
+            db.execute("PRAGMA foreign_keys = ON")
+
+            db.commit()
+            print("Migración de citas completada.")
