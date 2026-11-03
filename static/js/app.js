@@ -84,7 +84,8 @@ servicio.addEventListener("change", cargarHorarios);
 fecha.addEventListener("change", cargarHorarios);
 
 
-// Guardar la reserva
+
+ // Guardar la reserva con comprobante
 formulario.addEventListener("submit", async (event) => {
 
     event.preventDefault();
@@ -98,13 +99,28 @@ formulario.addEventListener("submit", async (event) => {
         return;
     }
 
-    const datos = {
-        servicio_id: servicio.value,
-        fecha: fecha.value,
-        hora: horaSeleccionada.value,
-        cliente: document.getElementById("cliente").value.trim(),
-        telefono: document.getElementById("telefono").value.trim()
-    };
+    const archivo = document.getElementById("comprobante").files[0];
+
+    if (!archivo) {
+        resultado.textContent = "Adjunta tu comprobante de pago.";
+        resultado.classList.add("error");
+        return;
+    }
+
+    if (archivo.size > 5 * 1024 * 1024) {
+        resultado.textContent = "La imagen no puede superar los 5 MB.";
+        resultado.classList.add("error");
+        return;
+    }
+
+    const datos = new FormData();
+
+    datos.append("servicio_id", servicio.value);
+    datos.append("fecha", fecha.value);
+    datos.append("hora", horaSeleccionada.value);
+    datos.append("cliente", document.getElementById("cliente").value.trim());
+    datos.append("telefono", document.getElementById("telefono").value.trim());
+    datos.append("comprobante", archivo);
 
     boton.disabled = true;
     boton.textContent = "PROCESANDO...";
@@ -113,25 +129,23 @@ formulario.addEventListener("submit", async (event) => {
 
         const respuesta = await fetch("/api/reservar", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(datos)
+            body: datos
         });
 
         const resultadoAPI = await respuesta.json();
 
         if (!respuesta.ok) {
-            throw new Error(resultadoAPI.error || "No se pudo registrar la cita.");
+            throw new Error(
+                resultadoAPI.error || "No se pudo registrar la cita."
+            );
         }
 
         resultado.classList.add("success");
 
         resultado.textContent =
-            `¡Solicitud registrada! Número de cita: #${resultadoAPI.cita_id}. ` +
-            `Servicio: ${resultadoAPI.servicio}. ` +
-            `Fecha: ${resultadoAPI.fecha}. Hora: ${resultadoAPI.hora}. ` +
-            "Tu cita está pendiente de confirmación.";
+            `¡Solicitud registrada! Cita #${resultadoAPI.cita_id}. ` +
+            `Depósito registrado: RD$${resultadoAPI.deposito}. ` +
+            "El barbero revisará tu comprobante antes de confirmar.";
 
         formulario.reset();
 

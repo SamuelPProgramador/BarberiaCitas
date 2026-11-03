@@ -97,6 +97,55 @@
             </div>
 
             <input type="hidden" id="hora">
+            
+<div class="payment-info">
+
+    <h3>💳 Depósito para reservar</h3>
+
+    <p>
+        Para solicitar tu cita, debes realizar un depósito
+        del {{ configuracion.get('porcentaje_deposito', '50') }}%.
+    </p>
+
+    <div class="bank-details">
+
+        <p>
+            <strong>Banco:</strong>
+            {{ configuracion.get('banco_nombre', 'No configurado') }}
+        </p>
+
+        <p>
+            <strong>Titular:</strong>
+            {{ configuracion.get('banco_titular', 'No configurado') }}
+        </p>
+
+        <p>
+            <strong>Tipo de cuenta:</strong>
+            {{ configuracion.get('banco_tipo_cuenta', 'No configurado') }}
+        </p>
+
+        <p>
+            <strong>Número de cuenta:</strong>
+            {{ configuracion.get('banco_numero_cuenta', 'No configurado') }}
+        </p>
+
+        {% if configuracion.get('banco_documento') %}
+        <p>
+            <strong>Documento:</strong>
+            {{ configuracion.get('banco_documento') }}
+        </p>
+        {% endif %}
+
+    </div>
+
+    <p>
+        <strong>Importante:</strong>
+        Realiza el depósito y adjunta una captura
+        del comprobante.
+    </p>
+
+</div>
+
 
             <div class="form-group">
                 <label for="cliente">Nombre completo</label>
@@ -117,6 +166,26 @@
                     placeholder="Ej. 8091234567"
                     required>
             </div>
+            
+<div class="form-group">
+
+    <label for="comprobante">
+        Comprobante de pago
+    </label>
+
+    <input
+        type="file"
+        id="comprobante"
+        accept=".jpg,.jpeg,.png,.webp"
+        required>
+
+    <small>
+        Formatos permitidos: JPG, PNG o WEBP.
+        Máximo 5 MB.
+    </small>
+
+</div>
+
 
             <button type="submit" class="btn" id="btnReservar">
                 CONFIRMAR SOLICITUD →

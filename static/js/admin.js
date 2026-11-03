@@ -3,6 +3,7 @@ const lista = document.getElementById("appointmentsList");
 const tituloFecha = document.getElementById("selectedDate");
 
 let fechaActual = fechaInicial;
+let modalComprobante = null;
 
 function crearElemento(tag, texto, clase = "") {
     const elemento = document.createElement(tag);
@@ -10,6 +11,76 @@ function crearElemento(tag, texto, clase = "") {
     if (clase) elemento.className = clase;
     return elemento;
 }
+
+function mostrarComprobante(url) {
+
+    // Crear el modal solamente una vez
+    if (!modalComprobante) {
+
+        modalComprobante = document.createElement("div");
+        modalComprobante.className = "modal-comprobante";
+
+        const contenido = document.createElement("div");
+        contenido.className = "modal-comprobante-contenido";
+
+        const cerrar = document.createElement("button");
+        cerrar.type = "button";
+        cerrar.className = "modal-comprobante-cerrar";
+        cerrar.textContent = "✕";
+        cerrar.setAttribute("aria-label", "Cerrar comprobante");
+
+        const imagen = document.createElement("img");
+        imagen.className = "modal-comprobante-imagen";
+        imagen.alt = "Comprobante de pago";
+
+        contenido.appendChild(cerrar);
+        contenido.appendChild(imagen);
+        modalComprobante.appendChild(contenido);
+
+        document.body.appendChild(modalComprobante);
+
+        // Cerrar con el botón
+        cerrar.addEventListener("click", cerrarModalComprobante);
+
+        // Cerrar al pulsar fuera de la imagen
+        modalComprobante.addEventListener("click", (event) => {
+            if (event.target === modalComprobante) {
+                cerrarModalComprobante();
+            }
+        });
+
+        // Cerrar con Escape
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") {
+                cerrarModalComprobante();
+            }
+        });
+    }
+
+    const imagen = modalComprobante.querySelector(
+        ".modal-comprobante-imagen"
+    );
+
+    imagen.src = url;
+
+    modalComprobante.classList.add("activo");
+    document.body.classList.add("modal-abierto");
+}
+
+function cerrarModalComprobante() {
+
+    if (!modalComprobante) return;
+
+    modalComprobante.classList.remove("activo");
+    document.body.classList.remove("modal-abierto");
+
+    const imagen = modalComprobante.querySelector(
+        ".modal-comprobante-imagen"
+    );
+
+    imagen.src = "";
+}
+
 
 async function cargarCitas(fecha) {
 
@@ -82,6 +153,47 @@ async function cargarCitas(fecha) {
             detalles.appendChild(
                 crearElemento("p", `RD$ ${cita.precio}`)
             );
+            // Información del depósito
+            detalles.appendChild(
+                crearElemento(
+                    "p",
+                    `Depósito: RD$ ${cita.monto_deposito || 0}`
+                )
+            );
+
+            detalles.appendChild(
+                crearElemento(
+                    "p",
+                    `Pago: ${(cita.pago_estado || "pendiente").replaceAll("_", " ").toUpperCase()}`
+                )
+            );
+
+            // Mostrar comprobante
+        if (cita.comprobante) {
+
+            const comprobante = crearElemento(
+                "button",
+                "🧾 Ver comprobante de pago",
+                "action-comprobante"
+            );
+
+            comprobante.type = "button";
+
+            comprobante.addEventListener("click", () => {
+                mostrarComprobante(
+                    `/admin/comprobantes/${encodeURIComponent(cita.comprobante)}`
+                );
+            });
+
+            detalles.appendChild(comprobante);
+
+        } else {
+
+            detalles.appendChild(
+                crearElemento("p", "Sin comprobante")
+            );
+
+        }       
 
             const estado = crearElemento(
                 "span",

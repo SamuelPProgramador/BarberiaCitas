@@ -4,6 +4,12 @@ import hmac
 import calendar
 from datetime import datetime, date, timedelta
 from functools import wraps
+import math
+import uuid
+
+from flask import send_from_directory
+
+from werkzeug.utils import secure_filename
 
 from flask import (
     Flask, render_template, request, jsonify,
@@ -16,6 +22,23 @@ from database import get_db, init_db, migrar_citas
 load_dotenv()
 
 app = Flask(__name__)
+
+# ---------------------------------
+# CONFIGURACIÓN DE COMPROBANTES
+# ---------------------------------
+
+app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
+
+CARPETA_COMPROBANTES = (
+    os.path.join(app.instance_path, "comprobantes")
+)
+
+os.makedirs(CARPETA_COMPROBANTES, exist_ok=True)
+
+EXTENSIONES_PERMITIDAS = {
+    ".jpg", ".jpeg", ".png", ".webp"
+}
+
 
 app.secret_key = os.getenv("SECRET_KEY", "clave-solo-desarrollo")
 
@@ -37,7 +60,6 @@ def requiere_login(func):
             return redirect(url_for("login"))
         return func(*args, **kwargs)
     return decorada
-
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def login():
@@ -75,13 +97,26 @@ def logout():
     return redirect(url_for("login"))
 
 
+@app.route("/admin/comprobantes/<nombre_archivo>")
+@requiere_login
+def ver_comprobante(nombre_archivo):
+
+    # Evitar rutas manipuladas
+    if os.path.basename(nombre_archivo) != nombre_archivo:
+        return "Archivo no válido", 400
+
+    return send_from_directory(
+        CARPETA_COMPROBANTES,
+        nombre_archivo
+    )
+
 # ---------------------------------
 # PÁGINA PRINCIPAL
 # ---------------------------------
 
+
 @app.route("/")
 def inicio():
-
     with get_db() as db:
         servicios = db.execute("""
             SELECT *
@@ -90,7 +125,22 @@ def inicio():
             ORDER BY id
         """).fetchall()
 
-    return render_template("index.html", servicios=servicios)
+        filas = db.execute("""
+            SELECT clave, valor
+            FROM configuracion
+        """).fetchall()
+
+    configuracion = {
+        fila["clave"]: fila["valor"]
+        for fila in filas
+    }
+
+    return render_template(
+        "index.html",
+        servicios=servicios,
+        configuracion=configuracion
+    )
+
 
 
 # ---------------------------------
@@ -177,6 +227,7 @@ def admin():
 # CONSULTAR CITAS DE UN DÍA
 # ---------------------------------
 
+
 @app.route("/api/admin/citas")
 @requiere_login
 def admin_citas():
@@ -197,12 +248,21 @@ def admin_citas():
                 c.fecha,
                 c.hora,
                 c.estado,
+
                 s.nombre AS servicio,
-                s.precio,
-                s.duracion
+
+                COALESCE(c.precio_reservado, s.precio) AS precio,
+                s.duracion,
+
+                COALESCE(c.monto_deposito, 0) AS monto_deposito,
+                COALESCE(c.pago_estado, 'pendiente') AS pago_estado,
+                c.comprobante
+
             FROM citas c
             JOIN servicios s ON s.id = c.servicio_id
+
             WHERE c.fecha = ?
+
             ORDER BY c.hora
         """, (fecha,)).fetchall()
 
@@ -515,35 +575,67 @@ def api_horarios():
     return jsonify({"horarios": disponibles})
 
 
+
 @app.route("/api/reservar", methods=["POST"])
 def reservar():
 
-    datos = request.get_json(silent=True) or {}
+    cliente = request.form.get("cliente", "").strip()
+    telefono = request.form.get("telefono", "").strip()
+    fecha = request.form.get("fecha", "")
+    hora = request.form.get("hora", "")
+    servicio_id = request.form.get("servicio_id", "")
 
-    cliente = str(datos.get("cliente", "")).strip()
-    telefono = str(datos.get("telefono", "")).strip()
-    fecha = datos.get("fecha", "")
-    hora = datos.get("hora", "")
-    servicio_id = datos.get("servicio_id")
+    archivo = request.files.get("comprobante")
 
     if not all([cliente, telefono, fecha, hora, servicio_id]):
-        return jsonify({"error": "Completa todos los campos"}), 400
+        return jsonify({
+            "error": "Completa todos los campos."
+        }), 400
+
+    if not archivo or not archivo.filename:
+        return jsonify({
+            "error": "Debes adjuntar el comprobante de pago."
+        }), 400
 
     if len(cliente) > 100 or len(telefono) > 20:
-        return jsonify({"error": "Datos demasiado largos"}), 400
+        return jsonify({
+            "error": "Datos demasiado largos."
+        }), 400
 
     if not all(c.isdigit() or c in "+- ()" for c in telefono):
-        return jsonify({"error": "Teléfono inválido"}), 400
+        return jsonify({
+            "error": "Teléfono inválido."
+        }), 400
+
+    extension = os.path.splitext(archivo.filename)[1].lower()
+
+    if extension not in EXTENSIONES_PERMITIDAS:
+        return jsonify({
+            "error": "Formato inválido. Usa JPG, PNG o WEBP."
+        }), 400
 
     try:
         fecha_obj = date.fromisoformat(fecha)
         datetime.strptime(hora, "%H:%M")
         servicio_id = int(servicio_id)
     except (ValueError, TypeError):
-        return jsonify({"error": "Datos inválidos"}), 400
+        return jsonify({
+            "error": "Datos inválidos."
+        }), 400
 
     if fecha_obj < date.today() or fecha_obj.weekday() == 6:
-        return jsonify({"error": "Fecha no disponible"}), 400
+        return jsonify({
+            "error": "Fecha no disponible."
+        }), 400
+
+    nombre_archivo = (
+        uuid.uuid4().hex + extension
+    )
+
+    ruta_archivo = os.path.join(
+        CARPETA_COMPROBANTES,
+        secure_filename(nombre_archivo)
+    )
 
     with get_db() as db:
 
@@ -556,31 +648,83 @@ def reservar():
         """, (servicio_id,)).fetchone()
 
         if not servicio:
-            return jsonify({"error": "Servicio no disponible"}), 404
+            return jsonify({
+                "error": "Servicio no disponible."
+            }), 404
+
+        # Obtener porcentaje de depósito
+        fila_porcentaje = db.execute("""
+            SELECT valor
+            FROM configuracion
+            WHERE clave = 'porcentaje_deposito'
+        """).fetchone()
+
+        porcentaje = (
+            int(fila_porcentaje["valor"])
+            if fila_porcentaje else 50
+        )
+
+        if porcentaje < 1 or porcentaje > 100:
+            return jsonify({
+                "error": "Porcentaje de depósito inválido."
+            }), 500
+
+        precio = servicio["precio"]
+
+        monto_deposito = math.ceil(
+            precio * porcentaje / 100
+        )
 
         disponibles = generar_horarios(
             fecha, servicio["duracion"], db
         )
 
         if hora not in disponibles:
-            return jsonify({"error": "Horario no disponible"}), 409
+            return jsonify({
+                "error": "Horario no disponible."
+            }), 409
+
+        # Guardar imagen
+        archivo.save(ruta_archivo)
 
         cursor = db.execute("""
-            INSERT INTO citas
-            (cliente, telefono, servicio_id, fecha, hora, estado)
-            VALUES (?, ?, ?, ?, ?, 'pendiente')
-        """, (cliente, telefono, servicio_id, fecha, hora))
+            INSERT INTO citas (
+                cliente,
+                telefono,
+                servicio_id,
+                fecha,
+                hora,
+                estado,
+                precio_reservado,
+                monto_deposito,
+                pago_estado,
+                comprobante
+            )
+            VALUES (?, ?, ?, ?, ?, 'pendiente',
+                    ?, ?, 'pendiente_revision', ?)
+        """, (
+            cliente,
+            telefono,
+            servicio_id,
+            fecha,
+            hora,
+            precio,
+            monto_deposito,
+            nombre_archivo
+        ))
 
         cita_id = cursor.lastrowid
         db.commit()
 
     return jsonify({
-        "mensaje": "Solicitud registrada",
+        "mensaje": "Solicitud registrada.",
         "cita_id": cita_id,
         "servicio": servicio["nombre"],
-        "precio": servicio["precio"],
+        "precio": precio,
+        "deposito": monto_deposito,
         "fecha": fecha,
-        "hora": hora
+        "hora": hora,
+        "pago_estado": "pendiente_revision"
     }), 201
 
 
