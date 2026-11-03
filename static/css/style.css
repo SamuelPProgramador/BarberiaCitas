@@ -823,3 +823,575 @@ body.modal-abierto {
 .action-comprobante:hover {
     background: #444;
 }
+
+
+/* =========================================
+   CONFIGURACIÓN ADMINISTRATIVA
+========================================= */
+
+.config-container {
+    width: min(100% - 40px, 850px);
+    margin: 45px auto;
+}
+
+.config-heading {
+    margin-bottom: 28px;
+}
+
+.config-heading h1 {
+    margin: 10px 0;
+    font-size: 32px;
+}
+
+.config-heading p {
+    color: #888;
+    line-height: 1.6;
+}
+
+.config-card {
+    background: var(--card, #fff);
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.config-section {
+    margin-bottom: 25px;
+}
+
+.config-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.config-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(190, 145, 75, 0.12);
+    border-radius: 12px;
+    font-size: 23px;
+}
+
+.config-section-heading h2 {
+    margin: 0 0 6px;
+    font-size: 19px;
+}
+
+.config-section-heading p {
+    margin: 0;
+    color: #888;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.config-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.config-field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.config-field-full {
+    grid-column: 1 / -1;
+}
+
+.config-field label {
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.config-field label span {
+    color: #999;
+    font-weight: 400;
+}
+
+.config-field input,
+.config-field select {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.config-field input:focus,
+.config-field select:focus {
+    border-color: #b58a4b;
+    box-shadow: 0 0 0 3px rgba(181, 138, 75, 0.12);
+}
+
+.config-divider {
+    height: 1px;
+    background: rgba(128, 128, 128, 0.2);
+    margin: 30px 0;
+}
+
+.config-percentage {
+    max-width: 350px;
+}
+
+.percentage-input {
+    position: relative;
+}
+
+.percentage-input input {
+    padding-right: 45px;
+}
+
+.percentage-input span {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-weight: 600;
+}
+
+.config-field small {
+    margin-top: 9px;
+    color: #888;
+    line-height: 1.5;
+}
+
+.config-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 35px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+.config-back,
+.config-save {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.config-back {
+    color: #777;
+    background: #eee;
+}
+
+.config-save {
+    border: none;
+    background: #b58a4b;
+    color: #fff;
+    transition: background 0.2s;
+}
+
+.config-save:hover {
+    background: #98703b;
+}
+
+.config-alert {
+    padding: 13px 16px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.config-alert-success {
+    background: #e8f7ed;
+    color: #207443;
+}
+
+.config-alert-error,
+.config-alert-danger {
+    background: #fdecec;
+    color: #a12d2d;
+}
+
+@media (max-width: 600px) {
+
+    .config-container {
+        width: calc(100% - 24px);
+        margin: 25px auto;
+    }
+
+    .config-heading h1 {
+        font-size: 26px;
+    }
+
+    .config-card {
+        padding: 20px 16px;
+    }
+
+    .config-fields {
+        grid-template-columns: 1fr;
+        gap: 17px;
+    }
+
+    .config-field-full {
+        grid-column: auto;
+    }
+
+    .config-actions {
+        flex-direction: column-reverse;
+    }
+
+    .config-back,
+    .config-save {
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+    }
+}
+
+
+/* =========================================
+   ADMINISTRACIÓN DE SERVICIOS
+========================================= */
+
+.services-admin {
+    width: min(100% - 40px, 1150px);
+    margin: 40px auto;
+}
+
+.services-heading,
+.services-list-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.services-heading h1 {
+    margin: 10px 0;
+    font-size: 32px;
+}
+
+.services-heading p,
+.services-list-heading p {
+    color: #888;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.services-counter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px;
+    padding: 18px;
+    border-radius: 12px;
+    background: rgba(181, 138, 75, 0.12);
+}
+
+.services-counter strong {
+    font-size: 28px;
+    color: #b58a4b;
+}
+
+.services-counter span {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+}
+
+.service-form,
+.service-card {
+    background: var(--card, #fff);
+    border: 1px solid rgba(128, 128, 128, 0.15);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
+}
+
+.service-form {
+    margin-bottom: 40px;
+}
+
+.service-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.service-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(181, 138, 75, 0.12);
+    border-radius: 12px;
+    font-size: 23px;
+}
+
+.service-section-heading h2 {
+    margin: 0 0 5px;
+    font-size: 20px;
+}
+
+.service-section-heading p {
+    margin: 0;
+    color: #888;
+    font-size: 13px;
+}
+
+.service-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.service-field {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-bottom: 16px;
+}
+
+.service-field-full {
+    grid-column: 1 / -1;
+}
+
+.service-field label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.service-field input,
+.service-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.service-field input:focus,
+.service-field textarea:focus {
+    border-color: #b58a4b;
+    box-shadow: 0 0 0 3px rgba(181, 138, 75, 0.12);
+}
+
+.service-field textarea {
+    resize: vertical;
+    min-height: 75px;
+}
+
+.service-form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.service-create-button,
+.service-save-button,
+.service-disable-button,
+.service-enable-button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.service-create-button,
+.service-save-button {
+    background: #b58a4b;
+    color: #fff;
+}
+
+.service-create-button:hover,
+.service-save-button:hover {
+    background: #98703b;
+}
+
+.services-list-heading {
+    margin-bottom: 20px;
+}
+
+.services-list-heading h2 {
+    margin: 0 0 6px;
+}
+
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.service-card {
+    margin: 0;
+    min-width: 0;
+}
+
+.service-card.inactive {
+    opacity: .75;
+}
+
+.service-card-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.service-card-heading h3 {
+    margin: 6px 0 0;
+    font-size: 18px;
+}
+
+.service-card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #999;
+}
+
+.service-status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.service-status.active {
+    background: #e8f7ed;
+    color: #207443;
+}
+
+.service-status.inactive-status {
+    background: #eee;
+    color: #777;
+}
+
+.service-save-button {
+    width: 100%;
+    margin-top: 3px;
+}
+
+.service-status-form {
+    margin-top: 12px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(128, 128, 128, .15);
+}
+
+.service-disable-button,
+.service-enable-button {
+    width: 100%;
+}
+
+.service-disable-button {
+    background: #fceaea;
+    color: #a12d2d;
+}
+
+.service-disable-button:hover {
+    background: #f7d7d7;
+}
+
+.service-enable-button {
+    background: #e8f7ed;
+    color: #207443;
+}
+
+.service-enable-button:hover {
+    background: #d2efdc;
+}
+
+.services-empty {
+    grid-column: 1 / -1;
+    padding: 45px 20px;
+    text-align: center;
+    background: var(--card, #fff);
+    border-radius: 14px;
+}
+
+.services-empty span {
+    font-size: 35px;
+}
+
+.services-empty h3 {
+    margin-bottom: 8px;
+}
+
+.services-empty p {
+    color: #888;
+}
+
+@media (max-width: 650px) {
+
+    .services-admin {
+        width: calc(100% - 24px);
+        margin: 25px auto;
+    }
+
+    .services-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .services-heading h1 {
+        font-size: 26px;
+    }
+
+    .services-counter {
+        width: 100%;
+        box-sizing: border-box;
+        flex-direction: row;
+        gap: 12px;
+    }
+
+    .service-form,
+    .service-card {
+        padding: 18px;
+    }
+
+    .service-form-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .service-field-full {
+        grid-column: auto;
+    }
+
+    .service-form-actions {
+        justify-content: stretch;
+    }
+
+    .service-create-button {
+        width: 100%;
+    }
+}

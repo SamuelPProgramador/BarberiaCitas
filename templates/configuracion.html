@@ -4,104 +4,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Configuración | Barbería</title>
+    <title>Configuración | La Barbería</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
-
-    <style>
-        .config-container {
-            max-width: 700px;
-            margin: 35px auto;
-            padding: 20px;
-        }
-
-        .config-card {
-            background: var(--card, #fff);
-            padding: 25px;
-            border-radius: 16px;
-        }
-
-        .config-card input,
-        .config-card select {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0 18px;
-            box-sizing: border-box;
-        }
-
-        .config-card button {
-            padding: 12px 20px;
-            cursor: pointer;
-        }
-
-        .config-card label {
-            font-weight: 600;
-        }
-    </style>
 </head>
-<body>
+
+<body class="admin-body">
+
+<header class="admin-navbar">
+    <a href="/" class="admin-brand">✂ LA BARBERÍA</a>
+
+    <div>
+        <a href="{{ url_for('admin') }}">Agenda</a>
+        <a href="{{ url_for('admin_servicios') }}">✂ Servicios y combos</a>
+        <span>Configuración</span>
+        <a href="{{ url_for('logout') }}" class="logout">Salir</a>
+    </div>
+</header>
 
 <main class="config-container">
 
-    <h1>Configuración de la barbería</h1>
-
-    <p>
-        <a href="{{ url_for('admin') }}">← Volver al calendario</a>
-    </p>
+    <div class="config-heading">
+        <span class="tag">AJUSTES DEL NEGOCIO</span>
+        <h1>Configuración</h1>
+        <p>
+            Administra los datos bancarios y las condiciones
+            de pago para las reservas.
+        </p>
+    </div>
 
     {% with mensajes = get_flashed_messages(with_categories=true) %}
         {% for categoria, mensaje in mensajes %}
-            <p>{{ mensaje }}</p>
+            <div class="config-alert config-alert-{{ categoria }}">
+                {{ mensaje }}
+            </div>
         {% endfor %}
     {% endwith %}
 
     <form method="POST" class="config-card">
 
-        <h2>Cuenta bancaria</h2>
+        <section class="config-section">
 
-        <label>Banco</label>
-        <input type="text" name="banco_nombre"
-               value="{{ configuracion.get('banco_nombre', '') }}"
-               placeholder="Ej. Banco Popular">
+            <div class="config-section-heading">
+                <div class="config-icon">🏦</div>
+                <div>
+                    <h2>Cuenta bancaria</h2>
+                    <p>
+                        Información que verá el cliente para realizar
+                        el depósito de su reserva.
+                    </p>
+                </div>
+            </div>
 
-        <label>Titular de la cuenta</label>
-        <input type="text" name="banco_titular"
-               value="{{ configuracion.get('banco_titular', '') }}">
+            <div class="config-fields">
 
-        <label>Tipo de cuenta</label>
-        <select name="banco_tipo_cuenta">
-            <option value="">Seleccionar</option>
-            <option value="Ahorro"
-                {% if configuracion.get('banco_tipo_cuenta') == 'Ahorro' %}selected{% endif %}>
-                Ahorro
-            </option>
-            <option value="Corriente"
-                {% if configuracion.get('banco_tipo_cuenta') == 'Corriente' %}selected{% endif %}>
-                Corriente
-            </option>
-        </select>
+                <div class="config-field">
+                    <label for="banco_nombre">Banco</label>
+                    <input
+                        id="banco_nombre"
+                        type="text"
+                        name="banco_nombre"
+                        value="{{ configuracion.get('banco_nombre', '') }}"
+                        placeholder="Ej. Banco Popular">
+                </div>
 
-        <label>Número de cuenta</label>
-        <input type="text" name="banco_numero_cuenta"
-               value="{{ configuracion.get('banco_numero_cuenta', '') }}">
+                <div class="config-field">
+                    <label for="banco_titular">Titular de la cuenta</label>
+                    <input
+                        id="banco_titular"
+                        type="text"
+                        name="banco_titular"
+                        value="{{ configuracion.get('banco_titular', '') }}"
+                        placeholder="Nombre del titular">
+                </div>
 
-        <label>Cédula o documento del titular (opcional)</label>
-        <input type="text" name="banco_documento"
-               value="{{ configuracion.get('banco_documento', '') }}">
+                <div class="config-field">
+                    <label for="banco_tipo_cuenta">Tipo de cuenta</label>
+                    <select id="banco_tipo_cuenta" name="banco_tipo_cuenta">
+                        <option value="">Seleccionar tipo de cuenta</option>
 
-        <hr>
+                        <option value="Ahorro"
+                            {% if configuracion.get('banco_tipo_cuenta') == 'Ahorro' %}selected{% endif %}>
+                            Ahorro
+                        </option>
 
-        <h2>Depósito de reserva</h2>
+                        <option value="Corriente"
+                            {% if configuracion.get('banco_tipo_cuenta') == 'Corriente' %}selected{% endif %}>
+                            Corriente
+                        </option>
+                    </select>
+                </div>
 
-        <label>Porcentaje requerido (%)</label>
-        <input type="number" name="porcentaje_deposito"
-               min="1" max="100"
-               value="{{ configuracion.get('porcentaje_deposito', '50') }}"
-               required>
+                <div class="config-field">
+                    <label for="banco_numero_cuenta">Número de cuenta</label>
+                    <input
+                        id="banco_numero_cuenta"
+                        type="text"
+                        name="banco_numero_cuenta"
+                        value="{{ configuracion.get('banco_numero_cuenta', '') }}"
+                        placeholder="Número de cuenta bancaria">
+                </div>
 
-        <button type="submit">Guardar configuración</button>
+                <div class="config-field config-field-full">
+                    <label for="banco_documento">
+                        Cédula o documento del titular
+                        <span>(Opcional)</span>
+                    </label>
+                    <input
+                        id="banco_documento"
+                        type="text"
+                        name="banco_documento"
+                        value="{{ configuracion.get('banco_documento', '') }}"
+                        placeholder="Documento del titular">
+                </div>
+
+            </div>
+
+        </section>
+
+        <div class="config-divider"></div>
+
+        <section class="config-section">
+
+            <div class="config-section-heading">
+                <div class="config-icon">💳</div>
+                <div>
+                    <h2>Depósito de reserva</h2>
+                    <p>
+                        Define qué porcentaje del servicio debe pagar
+                        el cliente para solicitar una cita.
+                    </p>
+                </div>
+            </div>
+
+            <div class="config-field config-percentage">
+                <label for="porcentaje_deposito">
+                    Porcentaje requerido
+                </label>
+
+                <div class="percentage-input">
+                    <input
+                        id="porcentaje_deposito"
+                        type="number"
+                        name="porcentaje_deposito"
+                        min="1"
+                        max="100"
+                        value="{{ configuracion.get('porcentaje_deposito', '50') }}"
+                        required>
+                    <span>%</span>
+                </div>
+
+                <small>
+                    Ejemplo: si el servicio cuesta RD$500 y configuras
+                    un 50%, el cliente deberá depositar RD$250.
+                </small>
+            </div>
+
+        </section>
+
+        <div class="config-actions">
+            <a href="{{ url_for('admin') }}" class="config-back">
+                Cancelar
+            </a>
+
+            <button type="submit" class="config-save">
+                Guardar configuración
+            </button>
+        </div>
 
     </form>
 

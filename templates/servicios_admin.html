@@ -4,148 +4,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servicios | Barbería</title>
+    <title>Servicios | La Barbería</title>
+
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        .services-admin {
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-
-        .service-form, .service-card {
-            background: var(--card, #fff);
-            padding: 20px;
-            border-radius: 14px;
-            margin-bottom: 20px;
-        }
-
-        .service-form input,
-        .service-form textarea,
-        .service-card input,
-        .service-card textarea {
-            width: 100%;
-            padding: 10px;
-            margin: 6px 0 14px;
-            box-sizing: border-box;
-        }
-
-        .service-card form {
-            margin-top: 15px;
-        }
-
-        .service-card button,
-        .service-form button {
-            padding: 10px 16px;
-            cursor: pointer;
-        }
-
-        .inactive {
-            opacity: .65;
-        }
-
-        .service-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 15px;
-        }
-    </style>
 </head>
-<body>
 
-<div class="services-admin">
+<body class="admin-body">
 
-    <h1>Gestionar servicios y combos</h1>
+<header class="admin-navbar">
+    <a href="/" class="admin-brand">✂ LA BARBERÍA</a>
 
-    <p>
-        <a href="{{ url_for('admin') }}">← Volver al calendario</a>
-    </p>
+    <div>
+        <a href="{{ url_for('admin') }}">Agenda</a>
+        <span>Servicios y combos</span>
+        <a href="{{ url_for('admin_configuracion') }}">⚙ Configuración</a>
+        <a href="{{ url_for('logout') }}" class="logout">Salir</a>
+    </div>
+</header>
+
+<main class="services-admin">
+
+    <div class="services-heading">
+        <div>
+            <span class="tag">GESTIÓN DEL NEGOCIO</span>
+            <h1>Servicios y combos</h1>
+            <p>
+                Administra los cortes, servicios, precios y duración
+                de las citas.
+            </p>
+        </div>
+
+        <div class="services-counter">
+            <strong>{{ servicios|length }}</strong>
+            <span>Servicios registrados</span>
+        </div>
+    </div>
 
     {% with mensajes = get_flashed_messages(with_categories=true) %}
         {% for categoria, mensaje in mensajes %}
-            <p>{{ mensaje }}</p>
+            <div class="config-alert config-alert-{{ categoria }}">
+                {{ mensaje }}
+            </div>
         {% endfor %}
     {% endwith %}
 
     <section class="service-form">
-        <h2>Crear nuevo servicio</h2>
 
-        <form method="POST">
-            <label>Nombre del corte o combo</label>
-            <input type="text" name="nombre" required maxlength="100"
-                   placeholder="Ej. Corte premium">
+        <div class="service-section-heading">
+            <div class="service-icon">✂</div>
+            <div>
+                <h2>Crear nuevo servicio</h2>
+                <p>Agrega un nuevo corte o combo a tu catálogo.</p>
+            </div>
+        </div>
 
-            <label>Descripción</label>
-            <textarea name="descripcion"
-                      placeholder="Describe el servicio"></textarea>
+        <form method="POST" class="service-create-form">
 
-            <label>Precio (RD$)</label>
-            <input type="number" name="precio" min="1" required>
+            <div class="service-form-grid">
 
-            <label>Duración en minutos</label>
-            <input type="number" name="duracion" min="1" required>
+                <div class="service-field service-field-full">
+                    <label>Nombre del corte o combo</label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        required
+                        maxlength="100"
+                        placeholder="Ej. Corte premium">
+                </div>
 
-            <button type="submit">Crear servicio</button>
+                <div class="service-field service-field-full">
+                    <label>Descripción</label>
+                    <textarea
+                        name="descripcion"
+                        rows="3"
+                        placeholder="Describe el servicio"></textarea>
+                </div>
+
+                <div class="service-field">
+                    <label>Precio (RD$)</label>
+                    <input
+                        type="number"
+                        name="precio"
+                        min="1"
+                        required
+                        placeholder="Ej. 500">
+                </div>
+
+                <div class="service-field">
+                    <label>Duración (minutos)</label>
+                    <input
+                        type="number"
+                        name="duracion"
+                        min="1"
+                        required
+                        placeholder="Ej. 30">
+                </div>
+
+            </div>
+
+            <div class="service-form-actions">
+                <button type="submit" class="service-create-button">
+                    + Crear servicio
+                </button>
+            </div>
+
         </form>
     </section>
 
-    <h2>Servicios existentes</h2>
+    <div class="services-list-heading">
+        <div>
+            <h2>Servicios existentes</h2>
+            <p>Modifica los precios, nombres y disponibilidad.</p>
+        </div>
+    </div>
 
     <div class="service-grid">
 
         {% for servicio in servicios %}
+
         <article class="service-card
             {% if not servicio['activo'] %}inactive{% endif %}">
 
-            <h3>
-                {{ servicio['nombre'] }}
-                {% if not servicio['activo'] %}
-                    (Inactivo)
+            <div class="service-card-heading">
+
+                <div>
+                    <span class="service-card-label">SERVICIO</span>
+                    <h3>{{ servicio['nombre'] }}</h3>
+                </div>
+
+                {% if servicio['activo'] %}
+                    <span class="service-status active">Activo</span>
+                {% else %}
+                    <span class="service-status inactive-status">Inactivo</span>
                 {% endif %}
-            </h3>
+
+            </div>
 
             <form method="POST"
                   action="{{ url_for('editar_servicio',
                                    servicio_id=servicio['id']) }}">
 
-                <label>Nombre</label>
-                <input type="text" name="nombre"
-                       value="{{ servicio['nombre'] }}"
-                       required maxlength="100">
+                <div class="service-field">
+                    <label>Nombre</label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        value="{{ servicio['nombre'] }}"
+                        required
+                        maxlength="100">
+                </div>
 
-                <label>Descripción</label>
-                <textarea name="descripcion">{{ servicio['descripcion'] or '' }}</textarea>
+                <div class="service-field">
+                    <label>Descripción</label>
+                    <textarea
+                        name="descripcion"
+                        rows="3">{{ servicio['descripcion'] or '' }}</textarea>
+                </div>
 
-                <label>Precio (RD$)</label>
-                <input type="number" name="precio"
-                       value="{{ servicio['precio'] }}" min="1" required>
+                <div class="service-form-grid">
 
-                <label>Duración (minutos)</label>
-                <input type="number" name="duracion"
-                       value="{{ servicio['duracion'] }}" min="1" required>
+                    <div class="service-field">
+                        <label>Precio (RD$)</label>
+                        <input
+                            type="number"
+                            name="precio"
+                            value="{{ servicio['precio'] }}"
+                            min="1"
+                            required>
+                    </div>
 
-                <button type="submit">Guardar cambios</button>
+                    <div class="service-field">
+                        <label>Duración (minutos)</label>
+                        <input
+                            type="number"
+                            name="duracion"
+                            value="{{ servicio['duracion'] }}"
+                            min="1"
+                            required>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="service-save-button">
+                    Guardar cambios
+                </button>
+
             </form>
 
             <form method="POST"
                   action="{{ url_for('cambiar_estado_servicio',
-                                   servicio_id=servicio['id']) }}">
+                                   servicio_id=servicio['id']) }}"
+                  class="service-status-form">
 
                 {% if servicio['activo'] %}
-                    <button type="submit">Desactivar servicio</button>
+                    <button type="submit" class="service-disable-button">
+                        Desactivar servicio
+                    </button>
                 {% else %}
-                    <button type="submit">Activar servicio</button>
+                    <button type="submit" class="service-enable-button">
+                        Activar servicio
+                    </button>
                 {% endif %}
+
             </form>
 
         </article>
+
         {% else %}
-            <p>No hay servicios registrados.</p>
+
+            <div class="services-empty">
+                <span>✂</span>
+                <h3>No hay servicios registrados</h3>
+                <p>Comienza agregando tu primer corte o combo.</p>
+            </div>
+
         {% endfor %}
 
     </div>
-</div>
+
+</main>
 
 </body>
 </html>
