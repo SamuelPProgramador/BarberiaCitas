@@ -208,7 +208,8 @@ async function cargarCitas(fecha) {
             // Contactar al cliente
             const whatsapp = document.createElement("a");
 
-            const numero = cita.telefono.replace(/\D/g, "");
+            let numero = cita.telefono.replace(/\D/g, "");
+            if (numero.length === 10) numero = "1" + numero; // RD: 809/829/849
 
             whatsapp.href =
                 `https://wa.me/${numero}?text=` +

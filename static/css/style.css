@@ -1526,3 +1526,24 @@ body.modal-abierto {
         font-size: 26px;
     }
 }
+.nav-login {
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 6px 16px;
+    border-radius: 999px;
+}
+
+.nav-login:hover {
+    background: var(--gold);
+    color: #101114;
+}
+
+.footer-login a {
+    color: var(--muted);
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.footer-login a:hover {
+    color: var(--gold);
+}

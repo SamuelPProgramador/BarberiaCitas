@@ -1,4 +1,3 @@
-
 import os
 import hmac
 import calendar
@@ -18,9 +17,18 @@ from flask import (
 from dotenv import load_dotenv
 
 from database import get_db, init_db, migrar_citas
+from zoneinfo import ZoneInfo
 
-load_dotenv()
+TZ = ZoneInfo("America/Santo_Domingo")
 
+def ahora():
+    return datetime.now(TZ).replace(tzinfo=None)
+
+def hoy_local():
+    return ahora().date()
+
+from pathlib import Path
+load_dotenv(Path(__file__).resolve().parent / ".env")
 app = Flask(__name__)
 
 # ---------------------------------
@@ -40,10 +48,18 @@ EXTENSIONES_PERMITIDAS = {
 }
 
 
-app.secret_key = os.getenv("SECRET_KEY", "clave-solo-desarrollo")
+app.secret_key = os.getenv("SECRET_KEY")
+ADMIN_USER = os.getenv("ADMIN_USER")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
-ADMIN_USER = os.getenv("ADMIN_USER", "barbero")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "cambiar-password")
+if not all([app.secret_key, ADMIN_USER, ADMIN_PASSWORD]):
+    raise RuntimeError("Faltan SECRET_KEY, ADMIN_USER o ADMIN_PASSWORD.")
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=True,  # requiere HTTPS; pon False solo en local
+)
 
 init_db()
 migrar_citas()
@@ -151,7 +167,7 @@ def inicio():
 @requiere_login
 def admin():
 
-    hoy = date.today()
+    hoy = hoy_local()
 
     mes = request.args.get("mes", hoy.month, type=int)
     anio = request.args.get("anio", hoy.year, type=int)
@@ -523,8 +539,8 @@ def generar_horarios(fecha, duracion, db):
 
         fin = actual + timedelta(minutes=duracion)
 
-        if fecha == date.today().isoformat():
-            if actual <= datetime.now():
+        if fecha == hoy_local().isoformat():
+            if actual.time() <= ahora().time():
                 actual += timedelta(minutes=30)
                 continue
 
@@ -553,7 +569,7 @@ def api_horarios():
     except (ValueError, TypeError):
         return jsonify({"error": "Datos inválidos"}), 400
 
-    if fecha_obj < date.today():
+    if fecha_obj < hoy_local():
         return jsonify({"error": "Fecha pasada"}), 400
 
     if fecha_obj.weekday() == 6:
@@ -623,7 +639,7 @@ def reservar():
             "error": "Datos inválidos."
         }), 400
 
-    if fecha_obj < date.today() or fecha_obj.weekday() == 6:
+    if fecha_obj < hoy_local() or fecha_obj.weekday() == 6:
         return jsonify({
             "error": "Fecha no disponible."
         }), 400
