@@ -1395,3 +1395,134 @@ body.modal-abierto {
         width: 100%;
     }
 }
+
+
+/* =====================================
+   MEJORAS VISUALES DEL PANEL ADMIN
+===================================== */
+
+/* Aprovechar mejor el ancho de pantalla */
+.dashboard {
+    width: calc(100% - 64px);
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 35px 0;
+    box-sizing: border-box;
+}
+
+/* Enlaces del menú */
+.admin-navbar a:not(.admin-brand):not(.logout),
+.admin-navbar a:not(.admin-brand):not(.logout):visited {
+    color: var(--gold);
+    text-decoration: none;
+}
+
+.admin-navbar a:hover {
+    opacity: .8;
+}
+
+/* Distribución de estadísticas */
+.stats-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-card {
+    min-width: 0;
+}
+
+/* Calendario y agenda */
+.admin-grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.calendar-card,
+.appointments-card {
+    min-width: 0;
+}
+
+/* Agenda con desplazamiento independiente */
+@media (min-width: 901px) {
+    .appointments-card {
+        max-height: calc(100vh - 260px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #555 transparent;
+    }
+}
+
+/* Mejor separación de las citas */
+.appointment-item {
+    padding: 20px 0;
+}
+
+.appointment-details h3 {
+    margin-bottom: 8px;
+}
+
+.appointment-actions {
+    margin-top: 10px;
+}
+
+/* Navegación adaptable */
+.admin-navbar {
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.admin-navbar > div {
+    flex-wrap: wrap;
+}
+
+/* Tablets */
+@media (max-width: 900px) {
+    .dashboard {
+        width: calc(100% - 40px);
+        padding: 28px 0;
+    }
+
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .appointments-card {
+        max-height: none;
+        overflow: visible;
+    }
+}
+
+/* Celulares */
+@media (max-width: 500px) {
+    .dashboard {
+        width: calc(100% - 24px);
+        padding: 22px 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 15px;
+    }
+
+    .stat-card strong {
+        font-size: 26px;
+    }
+
+    .admin-navbar {
+        justify-content: center;
+    }
+
+    .admin-navbar > div {
+        justify-content: center;
+        gap: 12px;
+        font-size: 13px;
+    }
+
+    .dashboard-heading h1 {
+        font-size: 26px;
+    }
+}
